@@ -1,0 +1,21 @@
+framework:
+  - terraform
+directory:
+  - infra
+  - bootstrap
+quiet: true
+compact: true
+skip-check:
+  - CKV_TF_1 # registry modules are pinned to exact versions as this guide requires, git commit pinning would conflict with that pinning strategy
+  - CKV_AWS_338 # lab cost: retention is driven by log_retention_days (default 30 days) as this guide specifies, 1 year retention is the production alternative
+  - CKV_AWS_252 # alerts are delivered by CloudWatch alarms on the streamed copy of the trail, a native trail digest topic duplicates them and needs extra KMS grants that cannot be tested in Phase A
+  - CKV_AWS_111 # standard AWS key policy pattern: the account root principal needs kms:* or the key becomes unusable, this guide forbids simplifying these statements
+  - CKV_AWS_109 # same key policy statement as CKV_AWS_111: account root full access is required for key administration, replacing it breaks log delivery
+  - CKV_AWS_356 # same key policy statement: resources is * because a KMS key policy applies to this one key only, scoping it is done by key policy conditions instead
+  - CKV2_AWS_62 # the audit bucket is written by CloudTrail and AWS Config, S3 event notifications would need a new destination resource outside this guide's scope, trail events already reach the alarms
+  - CKV2_AWS_31 # WAF log destinations need a CloudWatch resource policy that cannot be validated without an AWS account, untested apply risk in Phase A, add logging_configuration in Phase B
+  - CKV2_AWS_5 # the security group attaches to interface endpoint ENIs only when enable_interface_endpoints is true, which is off by default for cost, so nothing attaches in the default plan
+  - CKV_AWS_145 # lab: audit bucket uses SSE-S3 for the simplest reliable CloudTrail and Config delivery, SSE-KMS with an extended key policy is the production alternative
+  - CKV_AWS_144 # lab single region: cross-region replication needs a second region bucket, cost and scope beyond this phase, add replication before production
+  - CKV_AWS_18 # access logs for the audit bucket need a separate log bucket that this guide's single audit bucket design does not include, CloudTrail log file validation already detects tampering
+  - CKV2_AWS_3 # single account lab uses a regional GuardDuty detector, the check expects organization wide delegation which needs AWS Organizations and is out of scope for Phase A
