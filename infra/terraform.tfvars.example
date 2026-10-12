@@ -1,0 +1,6 @@
+region                     = "eu-central-1"
+azs                        = ["eu-central-1a", "eu-central-1b"]
+single_nat_gateway         = true
+api_allowed_cidrs          = ["YOUR.PUBLIC.IP/32"]
+alert_email                = "you@example.com"
+enable_interface_endpoints = false
